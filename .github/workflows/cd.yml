@@ -29,8 +29,13 @@ jobs:
           echo $runs_this_month
       
           # Set the output variable
-          echo "runs_this_month=$runs_this_month" >> "$GITHUB_OUTPUT"
-      - name: Deploy to dev
+          echo "runs_this_month=$current_date.$runs_this_month" >> "$GITHUB_OUTPUT"
+      - name: Docker build
+        env:
+          VERSION: ${{ steps.generate_version.outputs.runs_this_month }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
         run: |
-          echo "Deploying to dev"
-          echo "Runs this month: ${{ steps.generate_version.outputs.runs_this_month }}"
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} $DOCKER_REGISTRY
+          docker build -t $DOCKER_REGISTRY/test .
+          docker tag $DOCKER_REGISTRY/test $DOCKER_REGISTRY/test:$VERSION
+          docker push $DOCKER_REGISTRY/test:$VERSION
