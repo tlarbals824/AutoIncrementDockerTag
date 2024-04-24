@@ -17,7 +17,8 @@ jobs:
         id: generate_version
         run: |
           current_date=$(date +%Y-%m-%d)
-
+          current_date_short_year=$(date +%y-%m-%d)
+          
           # Get the number of runs using GitHub API
           runs_this_month=$(curl -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -28,7 +29,7 @@ jobs:
           echo $runs_this_month
       
           # Set the output variable
-          echo "runs_this_month=$current_date.$runs_this_month" >> "$GITHUB_OUTPUT"
+          echo "runs_this_month=$current_date_short_year.$runs_this_month" >> "$GITHUB_OUTPUT"
 
       - name: java setting
         uses: actions/setup-java@v3
