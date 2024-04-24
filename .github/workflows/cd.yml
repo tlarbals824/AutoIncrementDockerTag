@@ -32,7 +32,7 @@ jobs:
           echo "runs_this_month=$current_date.$runs_this_month" >> "$GITHUB_OUTPUT"
 
       - name: java setting
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
           java-version: '17'
