@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: java setting
         uses: actions/setup-java@v3
@@ -36,7 +36,7 @@ jobs:
       new_version: ${{ steps.generate_version.outputs.new_version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -72,7 +72,7 @@ jobs:
           DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
         run: |
-          docker build -f Dockerfile -t $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION .
+          docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION .
           docker tag $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION $DOCKER_REGISTRY/$IMAGE_NAME:latest
           docker push $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION
           docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest
@@ -82,5 +82,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: push_to_docker_hub
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Run Docker container
+        uses: appleboy/ssh-action@master
+        env:
+          VERSION: ${{ needs.push_to_docker_hub.outputs.new_version }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USERNAME }}
+          password: ${{ secrets.NCP_PASSWORD }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          script: |
+            echo "version is $VERSION"
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+            docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION
+            docker stop $IMAGE_NAME || true
+            docker rm $IMAGE_NAME || true
+            docker run -d --name $IMAGE_NAME -p 8080:8080 $DOCKER_REGISTRY/$IMAGE_NAME:$VERSION
