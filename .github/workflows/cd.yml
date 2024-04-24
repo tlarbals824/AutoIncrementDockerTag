@@ -1,0 +1,34 @@
+name: dev deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Generate Version
+        id: generate_version
+        run: |
+          # Set the current date and the first day of the month
+          current_date=$(date +%Y-%m-%d)
+          first_day_of_month=$(date -d "-$(date +%d) days +1 day" +%Y-%m-%d)
+
+          # Get the number of runs this month using GitHub API
+          runs_this_month=$(curl -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?per_page=100&status=completed&event=push" \
+            -u ${{ secrets.GITHUB_TOKEN }}:x-oauth-basic | jq '[.workflow_runs[] | select(.created_at >= "'$first_day_of_month'" and .created_at <= "'$current_date'")] | length')
+      
+          # Set the output variable
+          echo "::set-output name=runs_this_month::$runs_this_month"
+
+      - name: Deploy to dev
+        run: |
+          echo "Deploying to dev"
+          echo "Runs this month: ${{ steps.generate_version.outputs.runs_this_month }}"
