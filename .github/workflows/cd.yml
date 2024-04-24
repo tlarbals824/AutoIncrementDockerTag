@@ -30,6 +30,12 @@ jobs:
       
           # Set the output variable
           echo "runs_this_month=$current_date.$runs_this_month" >> "$GITHUB_OUTPUT"
+
+      - name: gradle setting
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+
       - name: Docker build
         env:
           VERSION: ${{ steps.generate_version.outputs.runs_this_month }}
