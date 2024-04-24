@@ -30,7 +30,7 @@ jobs:
           echo $runs_this_month
       
           # Set the output variable
-          echo "name=$runs_this_month" >> "$GITHUB_OUTPUT"
+          echo "runs_this_month=$runs_this_month" >> "$GITHUB_OUTPUT"
       - name: Deploy to dev
         run: |
           echo "Deploying to dev"
