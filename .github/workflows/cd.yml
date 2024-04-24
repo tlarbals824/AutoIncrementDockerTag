@@ -16,8 +16,8 @@ jobs:
       - name: Generate Version
         id: generate_version
         run: |
-          current_date=$(date +%Y-%m-%d)
-          current_date_short_year=$(date +%y-%m-%d)
+          current_date=$(date -d "9 hours" +%Y-%m-%d)
+          current_date_short_year=$(date -d "9 hours" +%y-%m-%d)
           
           # Get the number of runs using GitHub API
           runs_this_month=$(curl -H "Accept: application/vnd.github.v3+json" \
