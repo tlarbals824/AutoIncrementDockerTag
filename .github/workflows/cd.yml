@@ -31,6 +31,11 @@ jobs:
           # Set the output variable
           echo "runs_this_month=$current_date.$runs_this_month" >> "$GITHUB_OUTPUT"
 
+      - name: java setting
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
       - name: gradle setting
         run: |
           chmod +x gradlew
