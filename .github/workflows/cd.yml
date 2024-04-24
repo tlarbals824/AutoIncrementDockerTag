@@ -12,6 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+
+  push_to_docker_hub:
+    needs: application_build
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.generate_version.outputs.new_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+
       - name: java setting
         uses: actions/setup-java@v3
         with:
@@ -22,15 +33,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew build
-
-  push_to_docker_hub:
-    needs: application_build
-    runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.generate_version.outputs.new_version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
       - name: Generate Version
         id: generate_version
